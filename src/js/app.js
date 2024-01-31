@@ -1,9 +1,11 @@
 import NoSleep from "nosleep.js";
+import NoSleepFork from "@zakj/no-sleep";
 
-var noSleep = new NoSleep();
+let fork = false;
+let noSleep = new NoSleep();
 
 function updateSwitchStatus() {
-  let enabled = noSleep.isEnabled;
+  let enabled = fork ? noSleep.enabled : noSleep.isEnabled;
   if (noSleep._wakeLock) {
     enabled = !noSleep._wakeLock.released;
   }
@@ -30,7 +32,28 @@ function updateSwitchStatus() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
+  document
+    .getElementById("noSleepImplementation")
+    .addEventListener("change", async function (event) {
+      // Disable before switching
+      await noSleep.disable();
+
+      switch (event.target.value) {
+        case "original":
+          // Switch to the original NoSleep.js implementation
+          noSleep = new NoSleep();
+          fork = false;
+          break;
+        case "fork":
+          // Switch to the forked no-sleep implementation
+          noSleep = new NoSleepFork();
+          fork = true;
+          break;
+      }
+      noSleep.enable().then(updateSwitchStatus);
+    });
+
   document
     .getElementById("preventSleepSwitch")
     .addEventListener("click", (evt) => {
@@ -51,52 +74,48 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  document.addEventListener("DOMContentLoaded", () => {
-    function closeModal($el) {
-      $el.classList.remove("is-active");
-    }
+  function closeModal($el) {
+    $el.classList.remove("is-active");
+  }
 
-    function closeAllModals() {
-      (document.querySelectorAll(".modal") || []).forEach(($modal) => {
-        closeModal($modal);
-      });
-    }
-
-    // Add a click event on buttons to open a specific modal
-    (document.querySelectorAll(".js-modal-trigger") || []).forEach(
-      ($trigger) => {
-        const modal = $trigger.dataset.target;
-        const $target = document.getElementById(modal);
-        console.log($target);
-
-        $trigger.addEventListener("click", () => {
-          openModal($target);
-        });
-      }
-    );
-
-    // Add a click event on various child elements to close the parent modal
-    (
-      document.querySelectorAll(
-        ".modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button"
-      ) || []
-    ).forEach(($close) => {
-      const $target = $close.closest(".modal");
-
-      $close.addEventListener("click", () => {
-        closeModal($target);
-      });
+  function closeAllModals() {
+    (document.querySelectorAll(".modal") || []).forEach(($modal) => {
+      closeModal($modal);
     });
+  }
 
-    // Add a keyboard event to close all modals
-    document.addEventListener("keydown", (event) => {
-      const e = event || window.event;
+  // Add a click event on buttons to open a specific modal
+  (document.querySelectorAll(".js-modal-trigger") || []).forEach(($trigger) => {
+    const modal = $trigger.dataset.target;
+    const $target = document.getElementById(modal);
+    console.log($target);
 
-      if (e.keyCode === 27) {
-        // Escape key
-        closeAllModals();
-      }
+    $trigger.addEventListener("click", () => {
+      openModal($target);
     });
+  });
+
+  // Add a click event on various child elements to close the parent modal
+  (
+    document.querySelectorAll(
+      ".modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button"
+    ) || []
+  ).forEach(($close) => {
+    const $target = $close.closest(".modal");
+
+    $close.addEventListener("click", () => {
+      closeModal($target);
+    });
+  });
+
+  // Add a keyboard event to close all modals
+  document.addEventListener("keydown", (event) => {
+    const e = event || window.event;
+
+    if (e.keyCode === 27) {
+      // Escape key
+      closeAllModals();
+    }
   });
 
   noSleep.enable().then(updateSwitchStatus);
