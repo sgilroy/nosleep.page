@@ -2,7 +2,7 @@
   "name": "NoSleep Demo Page",
   "short_name": "NoSleep",
   "description": "A demo page for NoSleep.js",
-  "start_url": "/",
+  "start_url": "/nosleep.page/",
   "display": "standalone",
   "background_color": "#fafafa",
   "theme_color": "#fafafa",
