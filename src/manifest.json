@@ -1,0 +1,17 @@
+{
+  "name": "NoSleep Demo Page",
+  "short_name": "NoSleep",
+  "description": "A demo page for NoSleep.js",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fafafa",
+  "theme_color": "#fafafa",
+  "icons": [
+    {
+      "src": "./icons/nosleep-demo-icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
