@@ -37,11 +37,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Set production base URL
-        run: echo "BASE_URL=https://${{ env.DOMAIN }}/${{ github.event.repository.name }}/" >> $GITHUB_ENV
+      - name: Set production base path
+        if: github.ref == 'refs/heads/main'
+        run: echo "BASE_PATH=/${{ github.event.repository.name }}/" >> $GITHUB_ENV
+
+      - name: Set base path for preview if PR
+        if: github.ref != 'refs/heads/main'
+        run: echo "BASE_PATH=/${{ github.event.repository.name }}/${{ env.PR_PATH}}/" >> $GITHUB_ENV
+
+      - name: Set base URL
+        run: echo "BASE_URL=https://${{ env.DOMAIN }}${{ env.BASE_PATH }}" >> $GITHUB_ENV
 
       - name: Build
-        run: npm run build
+        run: npm run build -- --public-url ${{ env.BASE_PATH }}
 
       - name: Deploy to GitHub Pages if this is the `main` branch
         uses: peaceiris/actions-gh-pages@v3
@@ -49,10 +57,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
-
-      - name: Set base URL for preview if PR
-        if: github.ref != 'refs/heads/main'
-        run: echo "BASE_URL=https://${{ env.DOMAIN }}/${{ github.event.repository.name }}/${{ env.PR_PATH}}/" >> $GITHUB_ENV
 
       - name: Deploy to PR preview
         uses: peaceiris/actions-gh-pages@v3
