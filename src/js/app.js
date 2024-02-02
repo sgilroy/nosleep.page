@@ -1,11 +1,12 @@
 import NoSleep from "nosleep.js";
 import NoSleepFork from "@zakj/no-sleep";
+import NoSleepScottjgilroy from "@scottjgilroy/no-sleep";
 
-let fork = false;
+let alternateApi = false;
 let noSleep = new NoSleep();
 
 function updateSwitchStatus() {
-  let enabled = fork ? noSleep.enabled : noSleep.isEnabled;
+  let enabled = alternateApi ? noSleep.enabled : noSleep.isEnabled;
   if (noSleep._wakeLock) {
     enabled = !noSleep._wakeLock.released;
   }
@@ -43,12 +44,19 @@ document.addEventListener("DOMContentLoaded", () => {
         case "original":
           // Switch to the original NoSleep.js implementation
           noSleep = new NoSleep();
-          fork = false;
+          alternateApi = false;
           break;
         case "fork":
           // Switch to the forked no-sleep implementation
           noSleep = new NoSleepFork();
-          fork = true;
+          alternateApi = true;
+          break;
+        case "fork-scottjgilroy":
+          // Switch to the forked no-sleep implementation
+          noSleep = new NoSleepScottjgilroy({
+            videoTitle: "Demo @scottjgilroy/no-sleep",
+          });
+          alternateApi = false;
           break;
       }
       noSleep.enable().then(updateSwitchStatus);
