@@ -169,5 +169,41 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 50);
     });
 
+  let elapsedTime = 0;
+  let intervalId = null;
+
+  function startStopwatch() {
+    // Clear any existing interval
+    if (intervalId !== null) {
+      clearInterval(intervalId);
+    }
+
+    // Reset the elapsed time to 0
+    elapsedTime = 0;
+
+    // Start a new interval
+    intervalId = setInterval(() => {
+      elapsedTime++;
+      document.getElementById("stopwatch").textContent = elapsedTime;
+    }, 1000);
+  }
+
+  function resetStopwatch() {
+    // Reset the elapsed time to 0
+    elapsedTime = 0;
+    document.getElementById("stopwatch").textContent = elapsedTime;
+  }
+
+  // Define the events that should reset the stopwatch
+  const userEvents = ["click", "keydown", "mousemove", "touchstart"];
+
+  // Add an event listener for each event
+  userEvents.forEach((event) => {
+    document.addEventListener(event, resetStopwatch);
+  });
+
+  // Start the stopwatch
+  startStopwatch();
+
   noSleep.enable().then(updateSwitchStatus);
 });
