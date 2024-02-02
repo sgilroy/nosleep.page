@@ -93,6 +93,30 @@
                 />
                 <label for="preventSleepSwitch">Prevent device sleeping</label>
               </div>
+              <div
+                class="card-footer-item field mx-auto is-flex is-align-items-baseline"
+              >
+                <button
+                  id="simulateBusyButton"
+                  class="button is-info is-rounded"
+                >
+                  Simulate app busy
+                </button>
+                <label for="busyForValue" class="label ml-2 mr-2">for</label>
+                <input
+                  id="busyForValue"
+                  type="number"
+                  value="1"
+                  min="1"
+                  class="input is-rounded"
+                />
+                <span id="busyForValueText" class="ml-2">second</span>
+                <div id="spinner" class="ml-2" style="display: none">
+                  <button class="button is-loading is-rounded" disabled>
+                    Loading...
+                  </button>
+                </div>
+              </div>
             </footer>
           </div>
         </div>

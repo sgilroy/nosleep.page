@@ -126,5 +126,48 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  document
+    .getElementById("busyForValue")
+    .addEventListener("input", function () {
+      // Get the number of seconds from the input field
+      const seconds = Number(this.value);
+
+      if (isNaN(seconds)) {
+        console.error("Invalid number of seconds");
+        return;
+      }
+
+      // Update the text to be plural if necessary
+      document.getElementById("busyForValueText").textContent =
+        seconds === 1 ? "second" : "seconds";
+    });
+
+  document
+    .getElementById("simulateBusyButton")
+    .addEventListener("click", function (event) {
+      // Get the number of seconds from the input field
+      const seconds = document.getElementById("busyForValue").value;
+
+      console.log("Simulating busy for " + seconds + " seconds");
+      const button = event.target;
+
+      // Disable the button and show the spinner
+      button.setAttribute("disabled", "disabled");
+      button.classList.add("is-loading");
+
+      // Use setTimeout to delay the start of the busy loop
+      setTimeout(() => {
+        // Start the busy loop
+        const end = Date.now() + seconds * 1000;
+        while (Date.now() < end) {
+          // This will block the main thread, simulating a busy app
+        }
+
+        // After the loop, enable the button and hide the spinner
+        button.removeAttribute("disabled");
+        button.classList.remove("is-loading");
+      }, 50);
+    });
+
   noSleep.enable().then(updateSwitchStatus);
 });
