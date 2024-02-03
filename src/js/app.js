@@ -1,6 +1,8 @@
-import NoSleep from "nosleep.js";
+import NoSleepScottjgilroy, {
+  createNoSleepVideo,
+} from "@scottjgilroy/no-sleep";
 import NoSleepFork from "@zakj/no-sleep";
-import NoSleepScottjgilroy from "@scottjgilroy/no-sleep";
+import NoSleep from "nosleep.js";
 
 let alternateApi = false;
 let noSleep = new NoSleep();
@@ -33,6 +35,8 @@ function updateSwitchStatus() {
   }
 }
 
+let updatedTimerId = null;
+
 document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("noSleepImplementation")
@@ -40,23 +44,68 @@ document.addEventListener("DOMContentLoaded", () => {
       // Disable before switching
       await noSleep.disable();
 
+      const options = {
+        videoTitle: "Demo @scottjgilroy/no-sleep",
+        onLogEvent: (eventText, level, eventType, eventData) => {
+          if (!noSleep.isEnabled) {
+            updateSwitchStatus();
+          }
+
+          if (eventType === "video timeupdate") {
+            // Update the progress bars to visualize the video progress
+            const progress = eventData.currentTime;
+            const duration = eventData.duration;
+            const videoProgress = document.getElementById("videoProgress");
+
+            if (progress > videoProgress.value) {
+              videoProgress.classList.add("progress-animated");
+            } else {
+              videoProgress.classList.remove("progress-animated");
+            }
+            videoProgress.value = progress;
+            videoProgress.max = duration;
+
+            if (eventData.updatedTime !== undefined) {
+              const videoProgressUpdated = document.getElementById(
+                "videoProgressUpdated"
+              );
+              videoProgressUpdated.classList.remove("hidden");
+
+              if (updatedTimerId) {
+                clearTimeout(updatedTimerId);
+              }
+              updatedTimerId = setTimeout(() => {
+                videoProgressUpdated.classList.add("hidden");
+                updatedTimerId = null;
+              }, 20);
+
+              videoProgressUpdated.value = progress;
+              videoProgressUpdated.max = duration;
+            }
+          } else {
+            console.log("onLogEvent", eventText, level, eventType, eventData);
+          }
+        },
+      };
+
+      alternateApi = false;
       switch (event.target.value) {
         case "original":
           // Switch to the original NoSleep.js implementation
           noSleep = new NoSleep();
-          alternateApi = false;
           break;
         case "fork":
-          // Switch to the forked no-sleep implementation
+          // Switch to the @zakj/no-sleep implementation
           noSleep = new NoSleepFork();
           alternateApi = true;
           break;
         case "fork-scottjgilroy":
-          // Switch to the forked no-sleep implementation
-          noSleep = new NoSleepScottjgilroy({
-            videoTitle: "Demo @scottjgilroy/no-sleep",
-          });
-          alternateApi = false;
+          // Switch to the @scottjgilroy/no-sleep implementation
+          noSleep = new NoSleepScottjgilroy(options);
+          break;
+        case "fork-scottjgilroy-video":
+          // Switch to the @scottjgilroy/no-sleep implementation
+          noSleep = createNoSleepVideo(options);
           break;
       }
       noSleep.enable().then(updateSwitchStatus);

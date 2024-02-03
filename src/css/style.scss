@@ -1,3 +1,4 @@
+@import "../../node_modules/bulma/sass/elements/button";
 @import "../../node_modules/bulma/sass/helpers/flexbox";
 @import "../../node_modules/bulma/sass/helpers/spacing";
 @import "../../node_modules/bulma/sass/utilities/initial-variables";
@@ -6,4 +7,32 @@
 
 html {
   overflow-y: auto;
+}
+
+.progress-bar-container {
+  position: relative;
+  width: 100%;
+}
+
+.progress-bar-container progress.progress-updated {
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+progress.progress-animated::-webkit-progress-value {
+  transition: all 1s ease;
+}
+
+progress.progress-updated {
+  position: relative;
+}
+
+progress.progress-updated:not(.hidden) {
+  opacity: 1;
+}
+
+progress.progress-updated.hidden {
+  opacity: 0;
+  transition: opacity 1s;
 }

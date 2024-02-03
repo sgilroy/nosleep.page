@@ -69,7 +69,9 @@
               </div>
             </div>
             <footer class="card-footer is-flex is-flex-direction-column">
-              <div class="card-footer-item field mx-auto">
+              <div
+                class="card-footer-item field mx-auto is-flex-direction-column"
+              >
                 <label for="noSleepImplementation" class="mr-2">
                   NoSleep Implementation
                 </label>
@@ -81,6 +83,9 @@
                     <option value="fork">Fork (@zakj/no-sleep)</option>
                     <option value="fork-scottjgilroy">
                       Fork (@scottjgilroy/no-sleep)
+                    </option>
+                    <option value="fork-scottjgilroy-video">
+                      Fork (@scottjgilroy/no-sleep) video
                     </option>
                   </select>
                 </div>
@@ -100,7 +105,7 @@
                   id="simulateBusyButton"
                   class="button is-info is-rounded"
                 >
-                  Simulate app busy
+                  Simulate busy
                 </button>
                 <label for="busyForValue" class="label ml-2 mr-2">for</label>
                 <input
@@ -120,6 +125,27 @@
                   0
                 </p>
               </div>
+              <div
+                class="card-footer-item field mx-auto is-flex-direction-column"
+              >
+                <label for="videoProgress" class="label"
+                  >Hidden video progress</label
+                >
+                <div class="progress-bar-container">
+                  <progress
+                    class="progress is-primary progress-animated"
+                    id="videoProgress"
+                    value="0"
+                    max="100"
+                  ></progress>
+                  <progress
+                    class="progress is-info progress-updated hidden"
+                    id="videoProgressUpdated"
+                    value="0"
+                    max="100"
+                  ></progress>
+                </div>
+              </div>
             </footer>
           </div>
         </div>
@@ -138,5 +164,7 @@
       </div>
       <button class="modal-close is-large" aria-label="close"></button>
     </div>
+    <!-- This element is not displayed but ensures that the is-loading class is included in the compiled CSS -->
+    <div class="is-loading" style="display: none"></div>
   </body>
 </html>
