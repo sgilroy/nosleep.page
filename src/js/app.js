@@ -1,11 +1,14 @@
-import NoSleep from "nosleep.js";
+import NoSleepScottjgilroy, {
+  createNoSleepVideo,
+} from "@scottjgilroy/no-sleep";
 import NoSleepFork from "@zakj/no-sleep";
+import NoSleep from "nosleep.js";
 
-let fork = false;
+let alternateApi = false;
 let noSleep = new NoSleep();
 
 function updateSwitchStatus() {
-  let enabled = fork ? noSleep.enabled : noSleep.isEnabled;
+  let enabled = alternateApi ? noSleep.enabled : noSleep.isEnabled;
   if (noSleep._wakeLock) {
     enabled = !noSleep._wakeLock.released;
   }
@@ -32,6 +35,8 @@ function updateSwitchStatus() {
   }
 }
 
+let updatedTimerId = null;
+
 document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("noSleepImplementation")
@@ -39,16 +44,73 @@ document.addEventListener("DOMContentLoaded", () => {
       // Disable before switching
       await noSleep.disable();
 
+      // Dispose of the previous instance if possible
+      if (noSleep.dispose) {
+        noSleep.dispose();
+      }
+
+      const options = {
+        videoTitle: "Demo @scottjgilroy/no-sleep",
+        onLogEvent: (eventText, level, eventType, eventData) => {
+          if (!noSleep.isEnabled) {
+            updateSwitchStatus();
+          }
+
+          if (eventType === "video timeupdate") {
+            // Update the progress bars to visualize the video progress
+            const progress = eventData.currentTime;
+            const duration = eventData.duration;
+            const videoProgress = document.getElementById("videoProgress");
+
+            if (progress > videoProgress.value) {
+              videoProgress.classList.add("progress-animated");
+            } else {
+              videoProgress.classList.remove("progress-animated");
+            }
+            videoProgress.value = progress;
+            videoProgress.max = duration;
+
+            if (eventData.updatedTime !== undefined) {
+              const videoProgressUpdated = document.getElementById(
+                "videoProgressUpdated"
+              );
+              videoProgressUpdated.classList.remove("hidden");
+
+              if (updatedTimerId) {
+                clearTimeout(updatedTimerId);
+              }
+              updatedTimerId = setTimeout(() => {
+                videoProgressUpdated.classList.add("hidden");
+                updatedTimerId = null;
+              }, 20);
+
+              videoProgressUpdated.value = progress;
+              videoProgressUpdated.max = duration;
+            }
+          } else {
+            console.log("onLogEvent", eventText, level, eventType, eventData);
+          }
+        },
+      };
+
+      alternateApi = false;
       switch (event.target.value) {
         case "original":
           // Switch to the original NoSleep.js implementation
           noSleep = new NoSleep();
-          fork = false;
           break;
         case "fork":
-          // Switch to the forked no-sleep implementation
+          // Switch to the @zakj/no-sleep implementation
           noSleep = new NoSleepFork();
-          fork = true;
+          alternateApi = true;
+          break;
+        case "fork-scottjgilroy":
+          // Switch to the @scottjgilroy/no-sleep implementation
+          noSleep = new NoSleepScottjgilroy(options);
+          break;
+        case "fork-scottjgilroy-video":
+          // Switch to the @scottjgilroy/no-sleep implementation
+          noSleep = createNoSleepVideo(options);
           break;
       }
       noSleep.enable().then(updateSwitchStatus);
@@ -117,6 +179,85 @@ document.addEventListener("DOMContentLoaded", () => {
       closeAllModals();
     }
   });
+
+  document
+    .getElementById("busyForValue")
+    .addEventListener("input", function () {
+      // Get the number of seconds from the input field
+      const seconds = Number(this.value);
+
+      if (isNaN(seconds)) {
+        console.error("Invalid number of seconds");
+        return;
+      }
+
+      // Update the text to be plural if necessary
+      document.getElementById("busyForValueText").textContent =
+        seconds === 1 ? "second" : "seconds";
+    });
+
+  document
+    .getElementById("simulateBusyButton")
+    .addEventListener("click", function (event) {
+      // Get the number of seconds from the input field
+      const seconds = document.getElementById("busyForValue").value;
+
+      console.log("Simulating busy for " + seconds + " seconds");
+      const button = event.target;
+
+      // Disable the button and show the spinner
+      button.setAttribute("disabled", "disabled");
+      button.classList.add("is-loading");
+
+      // Use setTimeout to delay the start of the busy loop
+      setTimeout(() => {
+        // Start the busy loop
+        const end = Date.now() + seconds * 1000;
+        while (Date.now() < end) {
+          // This will block the main thread, simulating a busy app
+        }
+
+        // After the loop, enable the button and hide the spinner
+        button.removeAttribute("disabled");
+        button.classList.remove("is-loading");
+      }, 50);
+    });
+
+  let elapsedTime = 0;
+  let intervalId = null;
+
+  function startStopwatch() {
+    // Clear any existing interval
+    if (intervalId !== null) {
+      clearInterval(intervalId);
+    }
+
+    // Reset the elapsed time to 0
+    elapsedTime = 0;
+
+    // Start a new interval
+    intervalId = setInterval(() => {
+      elapsedTime++;
+      document.getElementById("stopwatch").textContent = elapsedTime;
+    }, 1000);
+  }
+
+  function resetStopwatch() {
+    // Reset the elapsed time to 0
+    elapsedTime = 0;
+    document.getElementById("stopwatch").textContent = elapsedTime;
+  }
+
+  // Define the events that should reset the stopwatch
+  const userEvents = ["click", "keydown", "mousemove", "touchstart"];
+
+  // Add an event listener for each event
+  userEvents.forEach((event) => {
+    document.addEventListener(event, resetStopwatch);
+  });
+
+  // Start the stopwatch
+  startStopwatch();
 
   noSleep.enable().then(updateSwitchStatus);
 });
