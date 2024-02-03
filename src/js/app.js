@@ -44,6 +44,11 @@ document.addEventListener("DOMContentLoaded", () => {
       // Disable before switching
       await noSleep.disable();
 
+      // Dispose of the previous instance if possible
+      if (noSleep.dispose) {
+        noSleep.dispose();
+      }
+
       const options = {
         videoTitle: "Demo @scottjgilroy/no-sleep",
         onLogEvent: (eventText, level, eventType, eventData) => {
